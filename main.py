@@ -133,6 +133,12 @@ def get_call_status():
     global call_status_current
     global global_transcript
     return jsonify({"status":call_status_current,"transcript":global_transcript}), 200
+
+@app.route("/get-transcript",methods=["GET"])
+def get_transcript_from_url():
+    url = request.args.get("url")
+    transcript = transcribe_recording(url)
+    return jsonify({"transcript":transcript})
     
 @app.route("/call-details", methods=["GET"])
 def get_call_details():
@@ -162,7 +168,7 @@ def get_call_details():
     
 @app.route("/call-status", methods=["POST"])
 def call_status():
-    print(request.form)
+    start_time = request.form.get("Timestamp")
     status = request.form.get("CallStatus")
     sid = request.form.get("CallSid")
     from_number = request.form.get("From")
