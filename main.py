@@ -6,7 +6,7 @@ import assemblyai as aai
 from twilio.rest import Client
 from flask_cors import CORS
 # ========== CONFIGURATION ==========
-client = Client("ACfa697543259291e2cc7c9959528b2e39", "78763e2424d044957294a83f191ef0b3")
+client = Client("ACfa697543259291e2cc7c9959528b2e39", "a77464ee11e0ab51e983afe39e13f481")
 CALLBACK_BASE_URL = "https://e7b7-171-48-110-91.ngrok-free.app"
 WS_SERVER_URL = "wss://four-jars-sort.loca.lt/media-stream"
 
@@ -99,7 +99,7 @@ def send_whatsapp():
     to = data.get("to")
     body = data.get("message")
     account_sid = 'ACfa697543259291e2cc7c9959528b2e39'
-    auth_token = '78763e2424d044957294a83f191ef0b3'
+    auth_token = 'a77464ee11e0ab51e983afe39e13f481'
     client = Client(account_sid, auth_token)
 
     message = client.messages.create(
