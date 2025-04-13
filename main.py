@@ -5,6 +5,7 @@ import os
 import assemblyai as aai
 from twilio.rest import Client
 from flask_cors import CORS
+import time
 # ========== CONFIGURATION ==========
 client = Client("ACfa697543259291e2cc7c9959528b2e39", "a77464ee11e0ab51e983afe39e13f481")
 CALLBACK_BASE_URL = "https://call-system-backend.onrender.com"
@@ -95,21 +96,27 @@ def recording_status():
 
 @app.route("/send-whatsapp", methods=["POST"])
 def send_whatsapp():
-    data = request.json
-    to = data.get("to")
-    body = data.get("message")
-    account_sid = 'ACfa697543259291e2cc7c9959528b2e39'
-    auth_token = 'a77464ee11e0ab51e983afe39e13f481'
-    client = Client(account_sid, auth_token)
+    try:
+        data = request.json
+        to = data.get("to")
+        body = data.get("message")
+        account_sid = 'ACfa697543259291e2cc7c9959528b2e39'
+        auth_token = 'a77464ee11e0ab51e983afe39e13f481'
+        client = Client(account_sid, auth_token)
 
-    message = client.messages.create(
-      from_='whatsapp:+14155238886',
-      body=body,
-      to=f'whatsapp:{to}'
-    )
+        # Send WhatsApp message using Twilio API
+        message = client.messages.create(
+            from_='whatsapp:+14155238886',
+            body=body,
+            to=f'whatsapp:{to}'
+        )
 
-    print(message.sid)
-    return jsonify({"success": True, "sid": message.sid}), 200
+        print(message.sid)
+        return jsonify({"success": True, "sid": message.sid}), 200
+    
+    except Exception as e:
+        print(f"[ERROR] Failed to send WhatsApp message: {e}")
+        return jsonify({"error": "Failed to send message", "message": str(e)}), 500
     
 
 @app.route("/voice", methods=["POST"])
@@ -127,9 +134,35 @@ def get_call_status():
     global global_transcript
     return jsonify({"status":call_status_current,"transcript":global_transcript}), 200
     
+@app.route("/call-details", methods=["GET"])
+def get_call_details():
+    call_sid = request.args.get("sid")  # Get the call SID from the query parameter
+    
+    if not call_sid:
+        return jsonify({"error": "Missing 'sid' parameter"}), 400
+
+    # Check if the call SID exists in the active_calls dictionary
+    call_details = active_calls.get(call_sid)
+    
+    if not call_details:
+        return jsonify({"error": f"Call with SID {call_sid} not found"}), 404
+    
+    
+    # Fetch the details: hold time, dead air time, and call status
+    call_info = {
+        "sid": call_sid,
+        "status": call_details.get("status"),
+        "hold_time": call_details.get("hold_time"),
+        "dead_air_time": call_details.get("dead_air_time"),
+        "start_time": call_details.get("start_time")
+    }
+
+    return jsonify(call_info), 200
+
     
 @app.route("/call-status", methods=["POST"])
 def call_status():
+    print(request.form)
     status = request.form.get("CallStatus")
     sid = request.form.get("CallSid")
     from_number = request.form.get("From")
@@ -137,6 +170,22 @@ def call_status():
     global call_status_current
     call_status_current = status
     print(f"[CALL STATUS] SID: {sid} | From: {from_number} | To: {to_number} | Status: {call_status_current}")
+    if sid not in active_calls:
+        active_calls[sid] = {
+            "status": status,
+            "hold_time": 0,
+            "dead_air_time": 0,
+            "start_time": time.time(),  # Store the call start time
+            "end_time": None
+        }
+
+    active_calls[sid]["status"] = status
+
+    if status == "completed":
+        active_calls[sid]["end_time"] = time.time()  # Record the end time when call is completed
+
+    
+    
     return Response("OK", status=200)
 
 
