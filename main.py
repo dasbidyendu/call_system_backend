@@ -83,15 +83,30 @@ def recording_status():
     recording_url = request.form.get("RecordingUrl")
     call_sid = request.form.get("CallSid")
     duration = request.form.get("RecordingDuration")
-
+    start_time = request.form.get("RecordingStartTime")
     print(f"[RECORDING COMPLETE] Call SID: {call_sid}")
     print(f"Recording URL: {recording_url}.mp3")
     print(f"Duration: {duration} seconds")
 
+    
     transcript = transcribe_recording(f"{recording_url}.mp3")
     if transcript:
         print(f"[FINAL TRANSCRIPT] {transcript}")
+    
+    data = {
+        "caller_number": "+19412057703",
+        "call_duration": duration,
+        "call_instance":start_time,
+        "transcript":transcript,
+        "audio_link":recording_url
+    }
 
+    response = requests.post("https://7734-171-48-110-91.ngrok-free.app/calls/create/",json=data)
+    if response.status_code == 200:
+        print("Success:", response.json())
+    else:
+        print("Error:", response.status_code, response.text)
+    
     return Response("OK", status=200)
 
 
