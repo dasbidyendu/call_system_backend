@@ -137,8 +137,8 @@ def get_call_status():
 @app.route("/get-transcript",methods=["GET"])
 def get_transcript_from_url():
     url = request.args.get("url")
-    transcript = transcribe_recording(url)
-    return jsonify({"transcript":transcript})
+    transcripted = transcribe_recording(url)
+    return jsonify({"transcript":transcripted})
     
 @app.route("/call-details", methods=["GET"])
 def get_call_details():
@@ -211,8 +211,7 @@ def transcribe_recording(recording_url):
         # Upload the downloaded file to AssemblyAI using SDK
         transcript = transcriber.transcribe(audio_file_path)
         print(transcript.text)
-        global global_transcript
-        global_transcript = transcript.text
+        
         return transcript.text
 
     except Exception as e:
