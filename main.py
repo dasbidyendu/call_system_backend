@@ -7,7 +7,7 @@ from twilio.rest import Client
 from flask_cors import CORS
 # ========== CONFIGURATION ==========
 client = Client("ACfa697543259291e2cc7c9959528b2e39", "a77464ee11e0ab51e983afe39e13f481")
-CALLBACK_BASE_URL = "https://e7b7-171-48-110-91.ngrok-free.app"
+CALLBACK_BASE_URL = "https://call-system-backend.onrender.com"
 WS_SERVER_URL = "wss://four-jars-sort.loca.lt/media-stream"
 
 app = Flask(__name__)
