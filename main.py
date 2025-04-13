@@ -79,6 +79,7 @@ def end_call():
 
 @app.route("/recording-status", methods=["POST"])
 def recording_status():
+    print(request.form)
     recording_url = request.form.get("RecordingUrl")
     call_sid = request.form.get("CallSid")
     duration = request.form.get("RecordingDuration")
